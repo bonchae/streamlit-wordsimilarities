@@ -1,7 +1,6 @@
 streamlit
 sklearn
 numpy
-altair
 matplotlib
 seaborn
 plotly
