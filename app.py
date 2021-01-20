@@ -24,14 +24,25 @@ comb = combinations(tokens, 2)
 
 most_similar = 0
 match_tokens = None
-
+compared_tokens = []
+similarities = []
 for token in list(comb):
     similarity = token[0].similarity(token[1])
-    
+    compared_tokens.append(token)
+    similarities.append(similarity)
     if similarity > most_similar:
+
         most_similar = similarity
         match_tokens = token
 
 st.write(f'{match_tokens[0]} and {match_tokens[1]} are the most similar with a similarity of {round(most_similar*100, 2)}%')
+st.write('## Results')
+
+df = pd.DataFrame({
+  'Tokens': compared_tokens,
+  'Similarity': similarities
+}).sort_values(by='Similarity', ascending=False)
+
+df
 
 st.text('https://towardsdatascience.com/streamlit-and-spacy-create-an-app-to-predict-sentiment-and-word-similarities-with-minimal-domain-14085085a5d4')
