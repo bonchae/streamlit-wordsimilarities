@@ -1,51 +1,17 @@
-# https://github.com/rahulbanerjee26/Word_Clouds
+# https://towardsdatascience.com/streamlit-and-spacy-create-an-app-to-predict-sentiment-and-word-similarities-with-minimal-domain-14085085a5d4
 
+import spacy
+from spacytextblob.spacytextblob import SpacyTextBlob
 import streamlit as st
-import json
-from wordcloud import WordCloud
-import matplotlib.pyplot as plt
-from PIL import Image
-import numpy as np
 
-def load_data():
-    with open('data/weekly.json','r') as file:
-        weekly_keywords = json.load(file)
-    with open('data/combined.json') as file:
-        combined_keyword = json.load(file)
-    dates = [date for date in weekly_keywords]
-    return combined_keyword,weekly_keywords,dates
+nlp = spacy.load('en_core_web_sm')
+spacy_text_blob = SpacyTextBlob()
+nlp.add_pipe(spacy_text_blob)
+text = 'Today is an amazing day!'
 
-def get_word_cloud(image,data,max_words,max_font_size):
-    if image == 'default':
-        wordcloud = WordCloud(width=400, height=400, repeat=True, max_words=max_words,
-                      max_font_size= max_font_size,background_color='white',
-                      ).generate_from_frequencies(data)
-    else:
-        path = f'data/image_masks/{image}.jpg'
-        mask = np.array(Image.open(path))
-        wordcloud = WordCloud(width=400, height=400, repeat=True, max_words=max_words,
-                        max_font_size= max_font_size,background_color='white',
-                        mask = mask).generate_from_frequencies(data)
-    return wordcloud
+st.title('Sentiment app')
+user_input = st.text_input("Text", text)
+doc = nlp(user_input)
 
-st.title("2020 Word Clouds based on Google Keyword and Twitter Hashtag trends")
-image = st.sidebar.selectbox(label='Select Image Mask',options=['default','twitter','hashtag','heart'])
-combined_keyword,weekly_keywords,dates = load_data()
-
-st.header("Entire Year")
-wordcloud = get_word_cloud(image,combined_keyword,800,15)
-fig1 = plt.figure()
-plt.imshow(wordcloud)
-plt.axis("off")
-st.pyplot(fig1)
-
-st.header("Weekly")
-date = st.selectbox(label='Select Date',options=dates)
-keywords = weekly_keywords[date]
-wordcloud = get_word_cloud(image , keywords,200,25)
-fig2 = plt.figure()
-plt.imshow(wordcloud)
-plt.axis("off")
-st.pyplot(fig2)
-
-st.title("Source: https://github.com/rahulbanerjee26/Word_Clouds")
+st.write('Polarity:', round(doc._.sentiment.polarity, 2))
+st.write('Subjectivity:', round(doc._.sentiment.subjectivity, 2)) 
