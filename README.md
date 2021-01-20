@@ -1,3 +1,3 @@
-# iris-streamlit
+# Wordcloud streamlit
 
-adapted from https://github.com/benjaminjack/streamlit-pca/blob/master/app.py
+adapted from https://github.com/Boadzie/sammaryman

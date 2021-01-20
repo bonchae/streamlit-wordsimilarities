@@ -1,72 +1,51 @@
-# https://github.com/benjaminjack/streamlit-pca/blob/master/app.py
+# https://github.com/rahulbanerjee26/Word_Clouds
 
 import streamlit as st
-import pandas as pd
+import json
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+from PIL import Image
 import numpy as np
-import plotly.express as px
 
-from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
+def load_data():
+    with open('data/weekly.json','r') as file:
+        weekly_keywords = json.load(file)
+    with open('data/combined.json') as file:
+        combined_keyword = json.load(file)
+    dates = [date for date in weekly_keywords]
+    return combined_keyword,weekly_keywords,dates
 
-st.title('Streamlit Principal Components Analysis Demo')
+def get_word_cloud(image,data,max_words,max_font_size):
+    if image == 'default':
+        wordcloud = WordCloud(width=400, height=400, repeat=True, max_words=max_words,
+                      max_font_size= max_font_size,background_color='white',
+                      ).generate_from_frequencies(data)
+    else:
+        path = f'data/image_masks/{image}.jpg'
+        mask = np.array(Image.open(path))
+        wordcloud = WordCloud(width=400, height=400, repeat=True, max_words=max_words,
+                        max_font_size= max_font_size,background_color='white',
+                        mask = mask).generate_from_frequencies(data)
+    return wordcloud
 
-st.subheader('Raw data')
-iris = px.data.iris().drop('species_id', axis=1)
+st.title("2020 Word Clouds based on Google Keyword and Twitter Hashtag trends")
+image = st.sidebar.selectbox(label='Select Image Mask',options=['default','twitter','hashtag','heart'])
+combined_keyword,weekly_keywords,dates = load_data()
 
-st.write(iris)
+st.header("Entire Year")
+wordcloud = get_word_cloud(image,combined_keyword,800,15)
+fig1 = plt.figure()
+plt.imshow(wordcloud)
+plt.axis("off")
+st.pyplot(fig1)
 
-st.subheader('Explore the original data')
+st.header("Weekly")
+date = st.selectbox(label='Select Date',options=dates)
+keywords = weekly_keywords[date]
+wordcloud = get_word_cloud(image , keywords,200,25)
+fig2 = plt.figure()
+plt.imshow(wordcloud)
+plt.axis("off")
+st.pyplot(fig2)
 
-xvar = st.selectbox('Select x-axis:', iris.columns[:-1])
-yvar = st.selectbox('Select y-axis:', iris.columns[:-1])
-
-st.write(px.scatter(iris, x=xvar, y=yvar, color='species'))
-
-iris_scaled = StandardScaler().fit_transform(iris.drop('species', axis=1))
-iris_pca = PCA()
-iris_transformed = iris_pca.fit_transform(iris_scaled)
-
-col_names = [f'component {i+1}' for i in range(iris_transformed.shape[1])]
-
-iris_transformed_df = pd.DataFrame(iris_transformed, columns=col_names)
-iris_transformed_df = pd.concat([iris_transformed_df, iris['species']], axis=1)
-
-st.subheader('Transformed data')
-
-st.write(iris_transformed_df)
-
-st.subheader('Explore principal components')
-
-xvar = st.selectbox('Select x-axis:', iris_transformed_df.columns[:-1])
-yvar = st.selectbox('Select y-axis:', iris_transformed_df.columns[:-1])
-
-st.write(px.scatter(iris_transformed_df, x=xvar, y=yvar, color='species'))
-
-st.subheader('Explore loadings')
-
-loadings = iris_pca.components_.T * np.sqrt(iris_pca.explained_variance_)
-
-loadings_df = pd.DataFrame(loadings, columns=col_names)
-loadings_df = pd.concat([loadings_df, 
-                         pd.Series(iris.columns[0:4], name='var')], 
-                         axis=1)
-
-component = st.selectbox('Select component:', loadings_df.columns[0:4])
-
-bar_chart = px.bar(loadings_df[['var', component]].sort_values(component), 
-                   y='var', 
-                   x=component, 
-                   orientation='h',
-                   range_x=[-1,1])
-
-
-st.write(bar_chart)
-
-st.write(loadings_df)
-
-
-st.markdown("## Party time!")
-st.write("Yay! You're done with this tutorial of Streamlit. Click below to celebrate.")
-btn = st.button("Celebrate!")
-if btn:
-    st.balloons()
+st.title("Source: https://github.com/rahulbanerjee26/Word_Clouds")
