@@ -1,4 +1,3 @@
-spacy
 streamlit
 spacytextblob
 spacy>=2.2.0,<3.0.0
