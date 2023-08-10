@@ -1,6 +1,7 @@
 # https://towardsdatascience.com/streamlit-and-spacy-create-an-app-to-predict-sentiment-and-word-similarities-with-minimal-domain-14085085a5d4
 
 import spacy
+from spacytextblob.spacytextblob import SpacyTextBlob
 import streamlit as st 
 from itertools import combinations 
 import pandas as pd 
@@ -8,7 +9,7 @@ import pandas as pd
 
 st.title('Similarity app')
 
-col1, col2, col3 = st.beta_columns(3)
+col1, col2, col3 = st.columns(3)
 with col1:
     word_1 = st.text_input('word 1', 'shirt')
 with col2:
