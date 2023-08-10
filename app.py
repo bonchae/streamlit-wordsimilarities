@@ -6,6 +6,7 @@ import streamlit as st
 from itertools import combinations 
 import pandas as pd 
 
+import subprocess
 
 st.title('Similarity app')
 
